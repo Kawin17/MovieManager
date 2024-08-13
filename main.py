@@ -1,14 +1,10 @@
 import sqlite3
 from imdb import IMDb
-
-# Initialize IMDb instance
 ia = IMDb()
 
-# Connect to SQLite database
 conn = sqlite3.connect('movies.db')
 cursor = conn.cursor()
 
-# Create tables for movies, watchlist, and watched movies
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,7 +34,6 @@ CREATE TABLE IF NOT EXISTS watched (
 conn.commit()
 
 def search_movie(movie_title):
-    """Searches for a movie in the database, or fetches it from IMDb if not found."""
     cursor.execute('SELECT * FROM movies WHERE title = ?', (movie_title,))
     movie = cursor.fetchone()
     
@@ -59,8 +54,7 @@ def search_movie(movie_title):
         plot = movie_data.get('plot outline')
         
         store_movie(title, year, genres, director, rating, plot)
-        
-        # Fetch the movie info again after storing
+
         cursor.execute('SELECT * FROM movies WHERE title = ?', (title,))
         movie = cursor.fetchone()
         display_movie_info(movie)
@@ -68,7 +62,6 @@ def search_movie(movie_title):
     user_choice(movie[0])
 
 def store_movie(title, year, genres, director, rating, plot):
-    """Stores the movie information in the database."""
     cursor.execute('''
     INSERT INTO movies (title, year, genres, director, rating, plot)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -77,7 +70,6 @@ def store_movie(title, year, genres, director, rating, plot):
     print(f"Movie '{title}' added to the database.")
 
 def display_movie_info(movie):
-    """Displays the movie's information."""
     print(f"\nTitle: {movie[1]}")
     print(f"Year: {movie[2]}")
     print(f"Genres: {movie[3]}")
@@ -86,7 +78,6 @@ def display_movie_info(movie):
     print(f"Plot: {movie[6]}")
 
 def user_choice(movie_id):
-    """Gives the user options to add to watchlist or mark as watched."""
     while True:
         print("\nOptions:")
         print("1. Add to Watchlist")
@@ -106,19 +97,16 @@ def user_choice(movie_id):
             print("Invalid choice. Please try again.")
 
 def add_to_watchlist(movie_id):
-    """Adds the movie to the user's watchlist."""
     cursor.execute('INSERT INTO watchlist (movie_id) VALUES (?)', (movie_id,))
     conn.commit()
     print("Movie added to watchlist.")
 
 def mark_as_watched(movie_id):
-    """Marks the movie as watched."""
     cursor.execute('INSERT INTO watched (movie_id) VALUES (?)', (movie_id,))
     conn.commit()
     print("Movie marked as watched.")
 
 def view_watchlist():
-    """Displays the user's watchlist."""
     cursor.execute('''
     SELECT movies.title, movies.year FROM movies
     JOIN watchlist ON movies.id = watchlist.movie_id
@@ -133,7 +121,6 @@ def view_watchlist():
             print(f"Title: {movie[0]}, Year: {movie[1]}")
 
 def view_watched():
-    """Displays the user's watched movies."""
     cursor.execute('''
     SELECT movies.title, movies.year FROM movies
     JOIN watched ON movies.id = watched.movie_id
@@ -148,7 +135,6 @@ def view_watched():
             print(f"Title: {movie[0]}, Year: {movie[1]}")
 
 def movie_management_system():
-    """Main function to run the Movie Management System."""
     while True:
         print("\nMovie Management System")
         print("1. Search for a Movie")
@@ -170,8 +156,6 @@ def movie_management_system():
         else:
             print("Invalid choice. Please try again.")
 
-# Run the Movie Management System
 movie_management_system()
 
-# Close the connection when done
 conn.close()
